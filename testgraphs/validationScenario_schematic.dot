@@ -1,0 +1,8 @@
+digraph G{
+	add_0[label="add_0";shape=rectangle];
+	load_0[label="load_0";shape=rectangle];
+	store_0[label="store_0";shape=rectangle];
+add_0->store_0;
+add_0->add_0;
+load_0->add_0;
+}

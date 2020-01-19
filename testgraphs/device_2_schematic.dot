@@ -1,0 +1,11 @@
+digraph G{
+	mul_0[label="add_0";shape=rectangle];
+	load_0[label="load_0";shape=rectangle];
+  load_1[label="load_0";shape=rectangle];
+  load_2[label="load_0";shape=rectangle];
+	store_0[label="store_0";shape=rectangle];
+mul_0->store_0;
+load_0->mul_0;
+load_1->mul_0;
+load_2->mul_0;
+}
