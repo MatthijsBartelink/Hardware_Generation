@@ -23,6 +23,8 @@ class Wire:
             self.bitwidth = self.input_component_bitwidth
         else:
             self.bitwidth = self.output_component_bitwidth
+        if (component_data[input].is_mul == 1):
+            self.bitwidth = self.bitwidth * 2
 
 class Component:
 
@@ -222,17 +224,28 @@ def generate_port_lines(component):
     instantiating the components.
     """
     lines = ""
-    inputwire_template = "            i_FU({0} downto {1}) => {2}(0 downto {3}),\n"
-    outputwire_template = "            o_FU({0} downto {1}) => {2}(0 downto {3}),\n"
+    inputwire_template = "            i_FU({1} downto {0}) => {2}({3} downto 0),\n"
+    outputwire_template = "            o_FU({1} downto {0}) => {2}({3} downto 0),\n"
 
     for i in range(len(component.inputwires)):
-        generated_line = inputwire_template.format(
-            i * component.bitwidth,
-            (i+1) * component.bitwidth - 1,
-            component.inputwires[i],
-            wires_dict[component.inputwires[i]].bitwidth - 1
-        )
-        lines += generated_line
+        if (component.is_mul == 0):
+            generated_line = inputwire_template.format(
+                i * component.bitwidth,
+                (i+1) * component.bitwidth - 1,
+                component.inputwires[i],
+                wires_dict[component.inputwires[i]].bitwidth - 1
+            )
+            lines += generated_line
+        else:
+            mulbitwidth = component.bitwidth // 2
+            generated_line = inputwire_template.format(
+                i * mulbitwidth,
+                (i+1) * mulbitwidth - 1,
+                component.inputwires[i],
+                mulbitwidth - 1
+            )
+            lines += generated_line
+
 
     for i in range(len(component.outputwires)):
         generated_line = outputwire_template.format(
@@ -245,7 +258,7 @@ def generate_port_lines(component):
 
     return lines
 
-outputfile = open("output.vhdl", 'a')
+outputfile = open("testgraph146.vhd", 'a')
 
 header = """library ieee;
 use ieee.std_logic_1164.all;
@@ -372,8 +385,8 @@ for node in graph_representation.nodes:
         component.instructions,
         component.bitwidth - 1,
         int(component.rf_depth) - 1,
-        component.input_ports_count - 1,
-        component.output_ports_count - 1,
+        component.input_ports_count,
+        component.output_ports_count,
         component.total_exe_cycles,
         component.opcode,
         component.is_mul,
